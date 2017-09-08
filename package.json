@@ -1,12 +1,12 @@
 {
   "name": "trollbox",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "",
-  "main": "dist/bundle.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "watchify -t [babelify] trollbox.js -o dist/bundle.js",
-    "build": "browserify -t [babelify] trollbox.js -o dist/bundle.js"
+    "watch": "watchify -t [babelify] index.js -o dist/trollbox.js",
+    "build": "browserify -t [babelify] index.js -o dist/trollbox.js"
   },
   "devDependencies": {
     "babelify": "^7.3.0",
