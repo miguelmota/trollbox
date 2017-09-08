@@ -12,7 +12,8 @@ function init () {
       messagingSenderId: '770197609793'
     },
     channel: 'demo',
-    user: 'anon'
+    user: 'anon',
+    delayRender: false
   }
 
   var trollbox = new window.Trollbox(config)

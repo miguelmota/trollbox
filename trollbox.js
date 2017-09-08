@@ -23,15 +23,16 @@ class Trollbox {
     this.config.user = this.config.user || 'anon'
     this.initFirebase()
 
-    this.renderBox()
-    this.bindForm()
-
-    this.ref.off('child_added', this.onMessage)
-    this.ref.limitToFirst(100)
-    .on('child_added', this.onMessage)
+    if (!this.config.delayRender) {
+      this.render()
+    }
   }
 
   initFirebase () {
+    if (!window.firebase) {
+      return false
+    }
+
     if (!this.db) {
       var app = window.firebase.initializeApp(this.config.firebase)
       this.db = app.database()
@@ -43,6 +44,10 @@ class Trollbox {
   initRef () {
     const channel = (this.config.channel || '').replace(/[^a-zA-Z\d]/gi, '_')
     this.ref = this.db.ref(`trollbox/${channel}`)
+
+    this.ref.off('child_added', this.onMessage)
+    this.ref.limitToFirst(100)
+    .on('child_added', this.onMessage)
   }
 
   setChannel (channel) {
@@ -73,9 +78,18 @@ class Trollbox {
     this.addLog(value.user, value.message)
   }
 
+  render () {
+    this.renderBox()
+    this.bindForm()
+  }
+
   renderBox () {
     const selector = this.config.container
     this.container = document.querySelector(selector)
+
+    if (!this.container) {
+      return false
+    }
 
     // ugly, quick, and dirty
     this.container.innerHTML = `
