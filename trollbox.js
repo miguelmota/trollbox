@@ -7,6 +7,7 @@
    */
 
   var config = null
+  var ref = null
 
   function Trollbox (config) {
     const scriptId = 'FirebaseScript'
@@ -33,16 +34,17 @@
 
   function onLoad (_config) {
     _config.user = _config.user || 'anon'
+    var alreadyExists = false
 
     if (config) {
       config.channel = _config.channel
       config.user = _config.user
-      return false
+      alreadyExists = true
     } else {
       config = _config
+      ref = initFirebase(config)
     }
 
-    const ref = initFirebase(config)
     renderBox(config.container)
 
     const post = function (message) {
@@ -54,6 +56,10 @@
     }
 
     bindForm(post)
+
+    if (alreadyExists) {
+      return false
+    }
 
     const onMessage = function (snapshot) {
       const value = snapshot.val()

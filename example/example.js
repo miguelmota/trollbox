@@ -13,3 +13,8 @@ const config = {
 }
 
 const trollbox = new window.Trollbox(config)
+
+setTimeout(() => {
+  config.channel = 'foo'
+  const trollbox = new window.Trollbox(config)
+}, 2000)
