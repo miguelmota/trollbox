@@ -6,6 +6,8 @@
    * this is a quick and dirty MVP.
    */
 
+  var config = null
+
   function Trollbox (config) {
     const scriptId = 'FirebaseScript'
     if (document.querySelector(`#${scriptId}`)) {
@@ -29,14 +31,23 @@
     */
   }
 
-  function onLoad (config) {
-    const user = config.user || 'anon'
+  function onLoad (_config) {
+    _config.user = _config.user || 'anon'
+
+    if (config) {
+      config.channel = _config.channel
+      config.user = _config.user
+      return false
+    } else {
+      config = _config
+    }
+
     const ref = initFirebase(config)
     renderBox(config.container)
 
     const post = function (message) {
       ref.push().set({
-        user: user,
+        user: config.user,
         message: message,
         date: (Date.now() / 1e3) | 0
       })
@@ -60,20 +71,9 @@
   function initFirebase (config) {
     const channel = (config.channel || '').replace(/[^a-zA-Z\d]/, '_')
 
-    var ref = null
-
-    if (window.firebaseApp) {
-      ref = window.firebaseApp.ref
-    } else {
-      var app = window.firebase.initializeApp(config.firebase)
-      var db = app.database()
-      ref = db.ref(`trollbox/${channel}`)
-
-      window.firebaseCache = {
-        db: db,
-        ref: ref
-      }
-    }
+    var app = window.firebase.initializeApp(config.firebase)
+    var db = app.database()
+    var ref = db.ref(`trollbox/${channel}`)
 
     return ref
   }
