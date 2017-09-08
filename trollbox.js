@@ -69,7 +69,7 @@
   }
 
   function initFirebase (config) {
-    const channel = (config.channel || '').replace(/[^a-zA-Z\d]/, '_')
+    const channel = (config.channel || '').replace(/[^a-zA-Z\d]/gi, '_')
 
     var app = window.firebase.initializeApp(config.firebase)
     var db = app.database()
