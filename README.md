@@ -2,6 +2,8 @@
 
 > Instant [trollbox](http://www.urbandictionary.com/define.php?term=trollbox) using [Firebase](https://firebase.google.com/).
 
+<img src="./screenshot.gif" width="700">
+
 # Demo
 
 [https://lab.miguelmota.com/trollbox](https://lab.miguelmota.com/trollbox)

@@ -12,7 +12,7 @@ function init () {
       messagingSenderId: '770197609793'
     },
     channel: 'demo',
-    user: window.demo_user || 'anon'
+    user: 'anon'
   }
 
   var trollbox = new window.Trollbox(config)
