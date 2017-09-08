@@ -51,12 +51,11 @@
   }
 
   function initFirebase (config) {
-    let room = config.room || ''
-    room = room.replace(/[^a-zA-Z\d]/, '_')
+    const channel = (config.channel || '').replace(/[^a-zA-Z\d]/, '_')
 
     const app = window.firebase.initializeApp(config.firebase)
     const db = app.database()
-    const ref = db.ref(`trollbox/${room}`)
+    const ref = db.ref(`trollbox/${channel}`)
 
     return ref
   }
