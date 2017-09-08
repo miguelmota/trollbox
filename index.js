@@ -1,6 +1,6 @@
 class Trollbox {
   constructor (config) {
-    this.config = config
+    this.config = config || {}
     this.scriptId = 'FirebaseScript'
     if (document.querySelector(`#${this.scriptId}`)) {
       this.onLoad()
@@ -43,6 +43,11 @@ class Trollbox {
 
   initRef () {
     const channel = (this.config.channel || '').replace(/[^a-zA-Z\d]/gi, '_')
+
+    if (!this.db) {
+      return false
+    }
+
     this.ref = this.db.ref(`trollbox/${channel}`)
 
     this.ref.off('child_added', this.onMessage)
@@ -61,6 +66,10 @@ class Trollbox {
   }
 
   post (message) {
+    if (!this.ref) {
+      return false
+    }
+
     this.ref.push().set({
       user: this.config.user,
       message: message,
@@ -111,6 +120,10 @@ class Trollbox {
   }
 
   bindForm (post) {
+    if (!this.container) {
+      return false
+    }
+
     const form = this.container.querySelector('.TrollboxForm')
     this.form = form
 
@@ -131,8 +144,16 @@ class Trollbox {
       return false
     }
 
+    if (!this.container) {
+      return false
+    }
+
     const box = this.container.querySelector('.TrollboxMessages')
     const list = this.container.querySelector('.TrollboxMessagesList')
+
+    if (!(box && list)) {
+      return false
+    }
 
     list.innerHTML += `<li><strong>${this.escapeHtml(user)}:</strong> ${this.escapeHtml(message)}</li>`
 
