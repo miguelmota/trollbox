@@ -12,3 +12,7 @@ Database -> Rules
 }
 ```
 -->
+
+# License
+
+MIT
