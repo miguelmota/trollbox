@@ -8,6 +8,7 @@
 
   var config = null
   var ref = null
+  var db = null
 
   function Trollbox (config) {
     const scriptId = 'FirebaseScript'
@@ -34,51 +35,43 @@
 
   function onLoad (_config) {
     _config.user = _config.user || 'anon'
-    var alreadyExists = false
-
-    if (config) {
-      config.channel = _config.channel
-      config.user = _config.user
-      alreadyExists = true
-    } else {
-      config = _config
-      ref = initFirebase(config)
-    }
+    ref = initFirebase(_config)
+    config = _config
 
     renderBox(config.container)
-
-    const post = function (message) {
-      ref.push().set({
-        user: config.user,
-        message: message,
-        date: (Date.now() / 1e3) | 0
-      })
-    }
-
     bindForm(post)
 
-    if (alreadyExists) {
+    ref.off('child_added', onMessage)
+    ref.limitToFirst(100)
+    .on('child_added', onMessage)
+  }
+
+  function post (message) {
+    ref.push().set({
+      user: config.user,
+      message: message,
+      date: (Date.now() / 1e3) | 0
+    })
+  }
+
+  function onMessage (snapshot) {
+    const value = snapshot.val()
+
+    if (typeof value !== 'object') {
       return false
     }
 
-    const onMessage = function (snapshot) {
-      const value = snapshot.val()
-
-      if (typeof value !== 'object') {
-        return false
-      }
-
-      addLog(value.user, value.message)
-    }
-
-    ref.limitToFirst(100).on('child_added', onMessage)
+    addLog(value.user, value.message)
   }
 
   function initFirebase (config) {
     const channel = (config.channel || '').replace(/[^a-zA-Z\d]/gi, '_')
 
-    var app = window.firebase.initializeApp(config.firebase)
-    var db = app.database()
+    if (!db) {
+      var app = window.firebase.initializeApp(config.firebase)
+      db = app.database()
+    }
+
     var ref = db.ref(`trollbox/${channel}`)
 
     return ref
@@ -106,16 +99,19 @@
     `
   }
 
-  function bindForm (postFn) {
+  function bindForm (post) {
     const form = document.querySelector('.TrollboxForm')
 
-    form.addEventListener('submit', function (event) {
-      event.preventDefault()
-      const input = event.target.message
-      const message = input.value
-      postFn(message)
-      input.value = ''
-    })
+    form.removeEventListener('submit', onSubmit)
+    form.addEventListener('submit', onSubmit)
+  }
+
+  function onSubmit (event) {
+    event.preventDefault()
+    const input = event.target.message
+    const message = input.value
+    post(message)
+    input.value = ''
   }
 
   function addLog (user, message) {
