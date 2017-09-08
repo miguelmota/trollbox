@@ -73,6 +73,12 @@ trollbox.setChannel('random')
 trollbox.setUser('Bob')
 ```
 
+You can also completely destroy the trollbox:
+
+```javascript
+trollbox.destroy()
+```
+
 # License
 
 MIT

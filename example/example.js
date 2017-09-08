@@ -11,15 +11,15 @@ function init () {
       storageBucket: 'trollbox-d802b.appspot.com',
       messagingSenderId: '770197609793'
     },
-    channel: 'a',
-    user: 'anon'
+    channel: 'demo',
+    user: window.demo_user || 'anon'
   }
 
   var trollbox = new window.Trollbox(config)
 
   if (testing) {
     setTimeout(() => {
-      trollbox.setChannel('b')
+      trollbox.setChannel('someroom')
       trollbox.setUser('user')
     }, 2000)
 
