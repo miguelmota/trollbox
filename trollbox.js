@@ -36,8 +36,8 @@
 
     const post = function (message) {
       ref.push().set({
-        user,
-        message,
+        user: user,
+        message: message,
         date: (Date.now() / 1e3) | 0
       })
     }
@@ -60,16 +60,20 @@
   function initFirebase (config) {
     const channel = (config.channel || '').replace(/[^a-zA-Z\d]/, '_')
 
-    var app = null
+    var ref = null
 
     if (window.firebaseApp) {
-      app = window.firebaseApp
+      ref = window.firebaseApp.ref
     } else {
-      app = window.firebase.initializeApp(config.firebase)
-      window.firebaseApp = app
+      var app = window.firebase.initializeApp(config.firebase)
+      var db = app.database()
+      ref = db.ref(`trollbox/${channel}`)
+
+      window.firebaseCache = {
+        db: db,
+        ref: ref
+      }
     }
-    const db = app.database()
-    const ref = db.ref(`trollbox/${channel}`)
 
     return ref
   }
