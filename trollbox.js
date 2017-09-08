@@ -1,139 +1,161 @@
 (function (root) {
   'use strict'
 
-  /**
-   * WARNING: ugly code ahead.
-   * this is a quick and dirty MVP.
-   */
+  class Trollbox {
+    constructor (config) {
+      this.config = config
+      this.scriptId = 'FirebaseScript'
+      if (document.querySelector(`#${this.scriptId}`)) {
+        this.onLoad()
+      } else {
+        const script = document.createElement('script')
+        script.id = this.scriptId
+        script.src = 'https://www.gstatic.com/firebasejs/4.3.1/firebase.js'
+        document.body.appendChild(script)
+        script.onload = () => {
+          this.onLoad()
+        }
+      }
 
-  var config = null
-  var ref = null
-  var db = null
+      this.onMessage = this.onMessage.bind(this)
+      this.post = this.post.bind(this)
+      this.onSubmit = this.onSubmit.bind(this)
+    }
 
-  function Trollbox (config) {
-    const scriptId = 'FirebaseScript'
-    if (document.querySelector(`#${scriptId}`)) {
-      onLoad(config)
-    } else {
-      const script = document.createElement('script')
-      script.id = scriptId
-      script.src = 'https://www.gstatic.com/firebasejs/4.3.1/firebase.js'
-      document.body.appendChild(script)
-      script.onload = function () {
-        onLoad(config)
+    onLoad () {
+      this.config.user = this.config.user || 'anon'
+      this.initFirebase()
+
+      this.renderBox()
+      this.bindForm()
+
+      this.ref.off('child_added', this.onMessage)
+      this.ref.limitToFirst(100)
+      .on('child_added', this.onMessage)
+    }
+
+    initFirebase () {
+      if (!this.db) {
+        var app = window.firebase.initializeApp(this.config.firebase)
+        this.db = app.database()
+      }
+
+      this.initRef()
+    }
+
+    initRef () {
+      const channel = (this.config.channel || '').replace(/[^a-zA-Z\d]/gi, '_')
+      this.ref = this.db.ref(`trollbox/${channel}`)
+    }
+
+    setChannel (channel) {
+      this.config.channel = channel
+      this.onLoad()
+    }
+
+    setUser (user) {
+      this.config.user = user
+      this.onLoad()
+    }
+
+    post (message) {
+      this.ref.push().set({
+        user: this.config.user,
+        message: message,
+        date: (Date.now() / 1e3) | 0
+      })
+    }
+
+    onMessage (snapshot) {
+      const value = snapshot.val()
+
+      if (typeof value !== 'object') {
+        return false
+      }
+
+      this.addLog(value.user, value.message)
+    }
+
+    renderBox () {
+      const selector = this.config.container
+      this.container = document.querySelector(selector)
+
+      // ugly, quick, and dirty
+      this.container.innerHTML = `
+        <div class="TrollboxContainer">
+          <div class="TrollboxHeader">
+            Trollbox
+          </div>
+          <div class="TrollboxMessages">
+            <ul class="TrollboxMessagesList">
+            </ul>
+          </div>
+          <div class="TrollboxMessage">
+            <form class="TrollboxForm">
+              <input class="TrollboxInput" type="text" name="message" placeholder="Message (press enter to submit)" autocomplete="off" />
+            </form>
+          </div>
+        </div>
+      `
+    }
+
+    bindForm (post) {
+      const form = this.container.querySelector('.TrollboxForm')
+      this.form = form
+
+      this.form.removeEventListener('submit', this.onSubmit)
+      this.form.addEventListener('submit', this.onSubmit)
+    }
+
+    onSubmit (event) {
+      event.preventDefault()
+      const input = event.target.message
+      const message = input.value
+      this.post(message)
+      input.value = ''
+    }
+
+    addLog (user, message) {
+      if (!(user && message)) {
+        return false
+      }
+
+      const box = this.container.querySelector('.TrollboxMessages')
+      const list = this.container.querySelector('.TrollboxMessagesList')
+
+      list.innerHTML += `<li><strong>${this.escapeHtml(user)}:</strong> ${this.escapeHtml(message)}</li>`
+
+      box.scrollTop = box.scrollHeight
+    }
+
+    destroy () {
+      if (this.ref) {
+        this.ref.off('child_added', this.onMessage)
+      }
+
+      if (this.form) {
+        this.form.removeEventListener('submit', this.onSubmit)
+      }
+
+      if (this.container) {
+        this.container.innerHTML = ''
+      }
+
+      const script = document.querySelector(`#${this.scriptId}`)
+
+      if (script) {
+        script.remove()
       }
     }
 
-    /*
-    const style = document.createElement('link')
-    style.id = 'TrollboxStyle'
-    style.rel = 'stylesheet'
-    style.href = 'trollbox.css'
-    document.body.appendChild(style)
-    */
-  }
-
-  function onLoad (_config) {
-    _config.user = _config.user || 'anon'
-    ref = initFirebase(_config)
-    config = _config
-
-    renderBox(config.container)
-    bindForm(post)
-
-    ref.off('child_added', onMessage)
-    ref.limitToFirst(100)
-    .on('child_added', onMessage)
-  }
-
-  function post (message) {
-    ref.push().set({
-      user: config.user,
-      message: message,
-      date: (Date.now() / 1e3) | 0
-    })
-  }
-
-  function onMessage (snapshot) {
-    const value = snapshot.val()
-
-    if (typeof value !== 'object') {
-      return false
+    escapeHtml (unsafe) {
+      return unsafe
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/'/g, '&quot;')
+      .replace(/'/g, '&#039;')
     }
-
-    addLog(value.user, value.message)
-  }
-
-  function initFirebase (config) {
-    const channel = (config.channel || '').replace(/[^a-zA-Z\d]/gi, '_')
-
-    if (!db) {
-      var app = window.firebase.initializeApp(config.firebase)
-      db = app.database()
-    }
-
-    var ref = db.ref(`trollbox/${channel}`)
-
-    return ref
-  }
-
-  function renderBox (selector) {
-    const container = document.querySelector(selector)
-
-    // quick and dirty
-    container.innerHTML = `
-      <div class="TrollboxContainer">
-        <div class="TrollboxHeader">
-          Trollbox
-        </div>
-        <div class="TrollboxMessages">
-          <ul class="TrollboxMessagesList">
-          </ul>
-        </div>
-        <div class="TrollboxMessage">
-          <form class="TrollboxForm">
-            <input class="TrollboxInput" type="text" name="message" placeholder="Message (press enter to submit)" autocomplete="off" />
-          </form>
-        </div>
-      </div>
-    `
-  }
-
-  function bindForm (post) {
-    const form = document.querySelector('.TrollboxForm')
-
-    form.removeEventListener('submit', onSubmit)
-    form.addEventListener('submit', onSubmit)
-  }
-
-  function onSubmit (event) {
-    event.preventDefault()
-    const input = event.target.message
-    const message = input.value
-    post(message)
-    input.value = ''
-  }
-
-  function addLog (user, message) {
-    if (!(user && message)) {
-      return false
-    }
-
-    const container = document.querySelector('.TrollboxMessages')
-    const list = container.querySelector('.TrollboxMessagesList')
-
-    list.innerHTML += `<li><strong>${escapeHtml(user)}:</strong> ${escapeHtml(message)}</li>`
-
-    container.scrollTop = container.scrollHeight
-  }
-
-  function escapeHtml (unsafe) {
-    return unsafe
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/'/g, '&quot;')
-    .replace(/'/g, '&#039;')
   }
 
   if (typeof exports !== 'undefined') {
@@ -145,8 +167,10 @@
     define([], function () {
       return Trollbox
     })
-  } else {
-    root.Trollbox = Trollbox
+  }
+
+  if (typeof window === 'object') {
+    window.Trollbox = Trollbox
   }
 
 })(this);
