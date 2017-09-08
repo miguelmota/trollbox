@@ -1,6 +1,11 @@
 (function (root) {
   'use strict'
 
+  /**
+   * WARNING: ugly code ahead.
+   * this is a quick and dirty MVP.
+   */
+
   function Trollbox (config) {
     const scriptId = 'FirebaseScript'
     if (document.querySelector(`#${scriptId}`)) {
@@ -10,7 +15,9 @@
       script.id = scriptId
       script.src = 'https://www.gstatic.com/firebasejs/4.3.1/firebase.js'
       document.body.appendChild(script)
-      script.onload = () => onLoad(config)
+      script.onload = function () {
+        onLoad(config)
+      }
     }
 
     /*
@@ -27,7 +34,7 @@
     const ref = initFirebase(config)
     renderBox(config.container)
 
-    const post = (message) => {
+    const post = function (message) {
       ref.push().set({
         user,
         message,
@@ -37,7 +44,7 @@
 
     bindForm(post)
 
-    const onMessage = (snapshot) => {
+    const onMessage = function (snapshot) {
       const value = snapshot.val()
 
       if (typeof value !== 'object') {
@@ -53,7 +60,14 @@
   function initFirebase (config) {
     const channel = (config.channel || '').replace(/[^a-zA-Z\d]/, '_')
 
-    const app = window.firebase.initializeApp(config.firebase)
+    var app = null
+
+    if (window.firebaseApp) {
+      app = window.firebaseApp
+    } else {
+      app = window.firebase.initializeApp(config.firebase)
+      window.firebaseApp = app
+    }
     const db = app.database()
     const ref = db.ref(`trollbox/${channel}`)
 
@@ -85,7 +99,7 @@
   function bindForm (postFn) {
     const form = document.querySelector('.TrollboxForm')
 
-    form.addEventListener('submit', event => {
+    form.addEventListener('submit', function (event) {
       event.preventDefault()
       const input = event.target.message
       const message = input.value
