@@ -40,6 +40,8 @@ Firebase dashboard console -> Database -> Rules
 4. Copy Firebase project config from dashboard and initialize trollbox:
 
 ```javascript
+const Trollbox = require('trollbox')
+
 const config = {
   // DOM selector for trollbox
   container: '#trollbox',
@@ -61,7 +63,7 @@ const config = {
   user: 'anon'
 }
 
-const trollbox = new window.Trollbox(config)
+const trollbox = new Trollbox(config)
 ```
 
 5. Copy base [trollbox.css](./trollbox.css) stylesheet into your web app.
