@@ -1,7 +1,7 @@
 {
   "name": "trollbox",
-  "version": "0.0.16",
-  "description": "",
+  "version": "0.0.17",
+  "description": "Instant trollbox using Firebase.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
