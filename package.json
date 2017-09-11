@@ -1,6 +1,6 @@
 {
   "name": "trollbox",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "Instant trollbox using Firebase.",
   "main": "index.js",
   "scripts": {

@@ -56,11 +56,19 @@ class Trollbox {
   }
 
   setChannel (channel) {
+    if (channel === this.config.channel) {
+      return false
+    }
+
     this.config.channel = channel
     this.onLoad()
   }
 
   setUser (user) {
+    if (user === this.config.user) {
+      return false
+    }
+
     this.config.user = user
     this.onLoad()
   }
