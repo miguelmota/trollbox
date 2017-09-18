@@ -109,7 +109,7 @@ class Trollbox {
     }
 
     // ugly, quick, and dirty
-    this.container.innerHTML = `
+    const html = `
       <div class="TrollboxContainer">
         <div class="TrollboxHeader">
           Trollbox
@@ -125,6 +125,12 @@ class Trollbox {
         </div>
       </div>
     `
+
+    const doc = document.createDocumentFragment()
+    const div = document.createElement('div')
+    div.innerHTML = html
+    while (div.firstChild) doc.appendChild(div.firstChild)
+    this.container.appendChild(doc)
   }
 
   bindForm (post) {
@@ -163,7 +169,13 @@ class Trollbox {
       return false
     }
 
-    list.innerHTML += `<li><strong>${this.escapeHtml(user)}:</strong> ${this.escapeHtml(message)}</li>`
+    const html = `<strong>${this.escapeHtml(user)}:</strong> ${this.escapeHtml(message)}`
+
+    const doc = document.createDocumentFragment()
+    const listItem = document.createElement('li')
+    listItem.innerHTML = html
+    doc.appendChild(listItem)
+    list.appendChild(doc)
 
     box.scrollTop = box.scrollHeight
   }
