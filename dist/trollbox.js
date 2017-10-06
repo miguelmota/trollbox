@@ -21,7 +21,7 @@ class Trollbox {
   }
 
   onLoad() {
-    this.config.user = this.config.user || 'anon';
+    this.config.user = this.config.user || 'anonymous';
     this.initFirebase();
 
     if (!this.config.delayRender) {
