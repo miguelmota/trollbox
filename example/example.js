@@ -12,7 +12,7 @@ function init () {
       messagingSenderId: '770197609793'
     },
     channel: 'demo',
-    user: 'anon',
+    user: 'anonymous',
     delayRender: false
   }
 
